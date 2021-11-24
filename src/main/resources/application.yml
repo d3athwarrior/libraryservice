@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: libraryservice
+  main:
+    banner-mode: off
+  datasource:
+    url: jdbc:postgresql://john.db.elephantsql.com/iandqbcs
+    username: iandqbcs
+    password: Zz7RvgCP2d2Wjb09g-M60BDhnNqc9wuT
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 8080
+logging:
+  file:
+    name: logs/libraryservice.log
+  logback:
+    rollingpolicy:
+      total-size-cap: 10MB
+      file-name-pattern: logs/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+      max-history: 2
+      max-file-size: 1MB
