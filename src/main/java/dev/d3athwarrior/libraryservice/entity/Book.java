@@ -10,7 +10,8 @@ import javax.persistence.*;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "book_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -62,5 +63,15 @@ public class Book {
 
     public void setNumOfCopies(Integer numOfCopies) {
         this.numOfCopies = numOfCopies;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", authorName='" + authorName + '\'' +
+                ", numOfCopies=" + numOfCopies +
+                '}';
     }
 }
