@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://castor.db.elephantsql.com/vbwiqwoy
+    username: vbwiqwoy
+    password: 79lBnyi9dtKIHdocLNzTyRbtbNznzbaT
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
