@@ -1,6 +1,8 @@
 package dev.d3athwarrior.libraryservice.controller;
 
 import dev.d3athwarrior.libraryservice.entity.Book;
+import dev.d3athwarrior.libraryservice.entity.Issue;
+import dev.d3athwarrior.libraryservice.entity.User;
 import dev.d3athwarrior.libraryservice.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,6 +66,43 @@ public class BookControllerTest {
                 .andExpect(jsonPath("$[*]", empty()))
                 .andReturn();
         verify(bookService, times(1)).getAllBooks();
+    }
+
+    @Test
+    void givenBooksInLibrary_whenUserBorrowsABook_thenBookRemovedFromLibrary() throws Exception {
+        Issue issue = new Issue();
+        issue.setId(1L);
+        issue.setBook(new Book(1L, "The Alchemist", "Paulo Coelho", 2));
+        issue.setUser(new User(1L, "Test", "User"));
+        given(bookService.issueBook(anyLong(), anyLong())).willReturn(Optional.of(issue));
+        given(bookService.getRemainingBookCount(anyLong())).willReturn(1);
+        mockMvc.perform(MockMvcRequestBuilders.post("/books/1/issueto/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", isA(Map.class)))
+                .andExpect(jsonPath("$.bookId", is(1)))
+                .andExpect(jsonPath("$.userId", is(1)))
+                .andExpect(jsonPath("$.bookDTO", isA(Map.class)))
+                .andExpect(jsonPath("$.bookDTO.id", is(1)))
+                .andExpect(jsonPath("$.bookDTO.numCopiesAvailable", is(1)))
+                .andExpect(jsonPath("$.hasError", is(false)))
+                .andExpect(jsonPath("$.message", is("Book issued successfully")))
+                .andReturn();
+
+    }
+
+    @Test
+    void givenBooksInLibrary_whenUserBorrowsABook_andUserAlreadyHasBorrowedTwoBooks_thenUserSeesAFailureMessage() throws Exception {
+        given(bookService.issueBook(anyLong(), anyLong())).willReturn(Optional.empty());
+        mockMvc.perform(MockMvcRequestBuilders.post("/books/1/issueto/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", isA(Map.class)))
+                .andExpect(jsonPath("$.bookId", nullValue()))
+                .andExpect(jsonPath("$.userId", nullValue()))
+                .andExpect(jsonPath("$.bookDTO", nullValue()))
+                .andExpect(jsonPath("$.hasError", is(true)))
+                .andExpect(jsonPath("$.message", is("You have borrowed maximum number of books allowed")))
+                .andReturn();
+
     }
 }
 

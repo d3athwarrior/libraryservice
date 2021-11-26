@@ -1,8 +1,14 @@
 package dev.d3athwarrior.libraryservice;
 
 import dev.d3athwarrior.libraryservice.dto.BookDTO;
+import dev.d3athwarrior.libraryservice.dto.BookIssueDTO;
 import dev.d3athwarrior.libraryservice.entity.Book;
+import dev.d3athwarrior.libraryservice.entity.Issue;
+import dev.d3athwarrior.libraryservice.entity.User;
 import dev.d3athwarrior.libraryservice.repository.BookRepository;
+import dev.d3athwarrior.libraryservice.repository.IssueRepository;
+import dev.d3athwarrior.libraryservice.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,18 +16,21 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class LibraryserviceApplicationTests {
 
     @Autowired
+    BookRepository bookRepository;
+    @Autowired
+    IssueRepository issueRepository;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @Autowired
-    BookRepository bookRepository;
-
+    // START: User Story 1
     /*
      *  User Story:
      * 1. User can view books in library
@@ -48,20 +57,68 @@ class LibraryserviceApplicationTests {
      */
     @Test
     void givenBooksInLibrary_whenBooksViewed_thenListOfBooks() {
-        Book b = new Book();
-        b.setName("TestName");
-        b.setAuthorName("TestAuthorName");
-        b.setNumOfCopies(2);
-        Book b2 = new Book();
-        b2.setName("TestName2");
-        b2.setAuthorName("TestAuthorName2");
-        b2.setNumOfCopies(2);
-        bookRepository.save(b);
-        bookRepository.save(b2);
+        bookRepository.save(new Book(null, "TestName", "TestAuthorName", 2));
+        bookRepository.save(new Book(null, "TestName2", "TestAuthorName2", 2));
+        bookRepository.save(new Book(null, "TestName3", "TestAuthorName3", 2));
         ResponseEntity<BookDTO[]> listResponseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
         assertNotNull(listResponseEntity.getBody());
-        assertEquals(2, listResponseEntity.getBody().length);
-        bookRepository.deleteAll();
+        assertEquals(3, listResponseEntity.getBody().length);
     }
-    // End user story 1
+    // END: user story 1
+
+    // START: User story 2
+
+    /**
+     * User can borrow a book from the library
+     * <p>
+     * Given, there are books in the library
+     * When, I choose a book to add to my borrowed list
+     * Then, the book is added to my borrowed list
+     * And, the book is removed from the library
+     * <p>
+     * Note:
+     * a. Each User has a borrowing limit of 2 books at any point of time
+     */
+    @Test
+    void givenBooksInLibrary_whenBookIssueRequest_andUserIsNotIssuedTwoBooks_thenBookIsIssuedToUser() {
+        Book b1 = bookRepository.save(new Book(null, "TestName", "TestAuthorName", 2));
+        Book b2 = bookRepository.save(new Book(null, "TestName2", "TestAuthorName2", 1));
+        Book b3 = bookRepository.save(new Book(null, "TestName3", "TestAuthorName3", 2));
+        User u1 = userRepository.save(new User(null, "Test", "User"));
+        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b2.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
+        BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertEquals(b2.getId(), dto.getBookId());
+        assertEquals(u1.getId(), dto.getUserId());
+        assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
+        assertFalse(dto.getHasError());
+        assertEquals("Book issued successfully", dto.getMessage());
+
+    }
+
+    @Test
+    void givenBooksInLibrary_whenBookIssueRequest_andUserIsIssuedTwoBooks_thenErrorMessageIsReturned() {
+        Book b1 = bookRepository.save(new Book(null, "TestName", "TestAuthorName", 2));
+        Book b2 = bookRepository.save(new Book(null, "TestName2", "TestAuthorName2", 1));
+        Book b3 = bookRepository.save(new Book(null, "TestName3", "TestAuthorName3", 2));
+        User u1 = userRepository.save(new User(null, "Test", "User"));
+        issueRepository.save(new Issue(null, u1, b1));
+        issueRepository.save(new Issue(null, u1, b2));
+        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b3.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
+        BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertNotEquals(b2.getId(), dto.getBookId());
+        assertNotEquals(u1.getId(), dto.getUserId());
+        assertNull(dto.getBookDTO());
+        assertTrue(dto.getHasError());
+        assertEquals("You have borrowed maximum number of books allowed", dto.getMessage());
+    }
+    // END: User story 2
+
+    @AfterEach
+    public void tearDown() {
+        issueRepository.deleteAll();
+        bookRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 }
