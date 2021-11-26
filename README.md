@@ -42,18 +42,26 @@ Design documents available in the 'documents' folder.
 2. Make sure you have read and performed the steps of 'How to build the project'
 3. Open a command window where the jar file is and enter ```java -jar libraryservice-\<version_number\>.jar```
 
+### How to run the tests
+
+1. Navigate to the project root directory
+2. As per your OS (Windows or Linux) run either ```gradlew.bat test``` or ```./gradlew test```
+
 ### Features
 
 #### Available
 
 1. User can view books in library
    1. ser can view list of books in the library
+2. User can borrow a book from the library
+3. User can borrow a copy of a book from the library
 
 #### Future Scope
 
 1. User can view books in library
    1. ~~User can view list of books in the library~~
    2. User can view the detail of a book in the library
-2. User can borrow a book from the library
-3. User can borrow a copy of a book from the library
+2. ~~User can borrow a book from the library~~
+3. ~~User can borrow a copy of a book from the library~~
 4. User can return books to the library
+5. User Login
