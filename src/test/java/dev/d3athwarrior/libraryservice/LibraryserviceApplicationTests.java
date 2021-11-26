@@ -107,7 +107,6 @@ class LibraryserviceApplicationTests {
         ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b3.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
         BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
         assertNotNull(dto);
-        assertNotEquals(b2.getId(), dto.getBookDTO().getId());
         assertNotEquals(u1.getId(), dto.getUserId());
         assertNull(dto.getBookDTO());
         assertTrue(dto.getHasError());
