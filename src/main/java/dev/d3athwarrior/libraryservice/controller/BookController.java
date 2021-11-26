@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -46,18 +46,17 @@ public class BookController {
      */
     @PostMapping("{bookId}/issueto/{userId}")
     public BookIssueDTO borrowBook(@PathVariable Long bookId, @PathVariable Long userId) {
-        Optional<Issue> issueResultHolder = bookService.issueBook(bookId, userId);
+        Map<String, Object> issueResult = bookService.issueBook(bookId, userId);
         BookIssueDTO bookIssueDTO = new BookIssueDTO();
-        if (issueResultHolder.isPresent()) {
-            Issue issue = issueResultHolder.get();
-            Book issuedBook = issue.getBook();
-            bookIssueDTO.setBookId(issue.getBook().getId());
-            bookIssueDTO.setUserId(issue.getUser().getId());
-            bookIssueDTO.setMessage("Book issued successfully");
-            bookIssueDTO.setBookDTO(new BookDTO(issuedBook.getId(), issuedBook.getName(), issuedBook.getAuthorName(), issuedBook.getNumOfCopies(), bookService.getRemainingBookCount(issuedBook.getId())));
+        if ((boolean) issueResult.get("hasError")) {
+            bookIssueDTO.setHasError((Boolean) issueResult.get("hasError"));
+            bookIssueDTO.setMessage(issueResult.get("message").toString());
         } else {
-            bookIssueDTO.setHasError(true);
-            bookIssueDTO.setMessage("You have borrowed maximum number of books allowed");
+            Issue issue = (Issue) issueResult.get("issue");
+            Book issuedBook = issue.getBook();
+            bookIssueDTO.setUserId(issue.getUser().getId());
+            bookIssueDTO.setMessage(issueResult.get("message").toString());
+            bookIssueDTO.setBookDTO(new BookDTO(issuedBook.getId(), issuedBook.getName(), issuedBook.getAuthorName(), issuedBook.getNumOfCopies(), bookService.getRemainingBookCount(issuedBook.getId())));
         }
         return bookIssueDTO;
     }

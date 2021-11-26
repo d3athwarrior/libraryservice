@@ -88,7 +88,7 @@ class LibraryserviceApplicationTests {
         ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b2.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
         BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
         assertNotNull(dto);
-        assertEquals(b2.getId(), dto.getBookId());
+        assertEquals(b2.getId(), dto.getBookDTO().getId());
         assertEquals(u1.getId(), dto.getUserId());
         assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
         assertFalse(dto.getHasError());
@@ -107,13 +107,59 @@ class LibraryserviceApplicationTests {
         ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b3.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
         BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
         assertNotNull(dto);
-        assertNotEquals(b2.getId(), dto.getBookId());
+        assertNotEquals(b2.getId(), dto.getBookDTO().getId());
         assertNotEquals(u1.getId(), dto.getUserId());
         assertNull(dto.getBookDTO());
         assertTrue(dto.getHasError());
         assertEquals("You have borrowed maximum number of books allowed", dto.getMessage());
     }
     // END: User story 2
+
+    // START: User story 3
+
+    /**
+     * User can borrow a copy of a book from the library
+     * <p>
+     * Given, there are more than one copy of a book in the library
+     * When, I choose a book to add to my borrowed list
+     * Then, one copy of the book is added to my borrowed list
+     * And, the library has at least one copy of the book left
+     * <p>
+     * Note:
+     * a. Only 1 copy of a book can be borrowed by a User at any point of time
+     */
+    @Test
+    void givenMoreThanOneCopyOfABook_whenUserBorrowsABook_thenOneCopyIsBorrowedByUser_andAtLeastOneCopyIsLeft() {
+        Book b1 = bookRepository.save(new Book(null, "TestName", "TestAuthorName", 2));
+        User u1 = userRepository.save(new User(null, "Test", "User"));
+        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b1.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
+        BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertFalse(dto.getHasError());
+        assertEquals("Book issued successfully", dto.getMessage());
+        assertEquals(b1.getId(), dto.getBookDTO().getId());
+        assertEquals(1, dto.getBookDTO().getNumCopiesAvailable());
+    }
+
+    /**
+     * Given, there is only one copy of a book in the library
+     * When, I choose a book to add to my borrowed list
+     * Then, one copy of the book is added to my borrowed list
+     * And, the book is removed from the library
+     */
+    @Test
+    void givenOnlyOneCopyOfBookInLibrary_whenUserBorrowsTheBook_thenNoCopyShouldBeLeftInLibrary() {
+        Book b1 = bookRepository.save(new Book(null, "TestName", "TestAuthorName", 1));
+        User u1 = userRepository.save(new User(null, "Test", "User"));
+        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b1.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
+        BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertFalse(dto.getHasError());
+        assertEquals("Book issued successfully", dto.getMessage());
+        assertEquals(b1.getId(), dto.getBookDTO().getId());
+        assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
+    }
+    // END: User story 3
 
     @AfterEach
     public void tearDown() {

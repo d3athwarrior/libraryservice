@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,18 +69,30 @@ class BookServiceTest {
         issueToReturn.setUser(new User(1L, null, null));
         given(issueRepository.countByUser_Id(anyLong())).willReturn(1);
         given(issueRepository.save(any(Issue.class))).willReturn(issueToReturn);
-        Optional<Issue> issueReturnHolder = bookService.issueBook(1, 1);
-        assertThat(issueReturnHolder.get().getId()).isEqualTo(1L);
-        assertThat(issueReturnHolder.get().getBook()).isNotNull();
-        assertThat(issueReturnHolder.get().getUser()).isNotNull();
-        assertThat(issueReturnHolder.get().getBook().getId()).isEqualTo(1L);
-        assertThat(issueReturnHolder.get().getUser().getId()).isEqualTo(1L);
+        Map<String, Object> result = bookService.issueBook(1, 1);
+        Issue issue = (Issue) result.get("issue");
+        assertThat(issue.getId()).isEqualTo(1L);
+        assertThat(issue.getBook()).isNotNull();
+        assertThat(issue.getUser()).isNotNull();
+        assertThat(issue.getBook().getId()).isEqualTo(1L);
+        assertThat(issue.getUser().getId()).isEqualTo(1L);
     }
 
     @Test
     void givenBooksInLibrary_whenUserRequestsBookIssue_andUserAlreadyIsIssuedTwoBooks_thenNullIssueIsReturned() {
         given(issueRepository.countByUser_Id(anyLong())).willReturn(2);
-        assertThat(bookService.issueBook(1, 1).isEmpty()).isTrue();
+        assertThat(bookService.issueBook(1, 1).get("issue")).isNull();
+        assertThat(bookService.issueBook(1, 1).get("message")).isEqualTo("You have borrowed maximum number of books allowed");
+        assertThat(bookService.issueBook(1, 1).get("hasError")).isEqualTo(true);
+    }
+
+    @Test
+    void givenBooksInLibrary_whenUserRequestsBookIssue_andUserAlreadyHasOneCopy_thenNullIssueIsReturned() {
+        given(issueRepository.countByUser_Id(anyLong())).willReturn(1);
+        given(issueRepository.findIssuesByBook_IdAndUser_Id(anyLong(), anyLong())).willReturn(Optional.of(new Issue()));
+        assertThat(bookService.issueBook(1, 1).get("issue")).isNull();
+        assertThat(bookService.issueBook(1, 1).get("message")).isEqualTo("You have already been issued one copy of this book");
+        assertThat(bookService.issueBook(1, 1).get("hasError")).isEqualTo(true);
     }
 
     @Test

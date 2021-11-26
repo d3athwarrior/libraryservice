@@ -1,19 +1,10 @@
 package dev.d3athwarrior.libraryservice.dto;
 
 public class BookIssueDTO {
-    private Long bookId;
     private Long userId;
     private String message;
     private BookDTO bookDTO;
     private Boolean hasError = false;
-
-    public Long getBookId() {
-        return bookId;
-    }
-
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
 
     public Long getUserId() {
         return userId;
@@ -50,7 +41,6 @@ public class BookIssueDTO {
     @Override
     public String toString() {
         return "BookIssueDTO{" +
-                "bookId=" + bookId +
                 ", userId=" + userId +
                 ", message='" + message + '\'' +
                 ", bookDTO=" + bookDTO +

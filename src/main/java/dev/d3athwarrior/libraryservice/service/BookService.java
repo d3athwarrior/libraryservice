@@ -8,7 +8,9 @@ import dev.d3athwarrior.libraryservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -48,15 +50,31 @@ public class BookService {
      * @return Optional of {@link Issue}. In case the object has been saved successfully, it will contain the Issue object
      * else it will be empty
      */
-    public Optional<Issue> issueBook(long bookId, long userId) {
-        Issue i = null;
-        if (issueRepository.countByUser_Id(userId) < 2 /* && issueRepository.findIssuesByBook_IdAndUser_Id(bookId, userId) == null  */) {
-            i = new Issue();
-            i.setBook(bookRepository.getById(bookId));
-            i.setUser(userRepository.getById(userId));
-            i = issueRepository.save(i);
+    public Map<String, Object> issueBook(long bookId, long userId) {
+        Issue newIssue = null;
+        Map<String, Object> resultMap = new HashMap<>();
+        String message;
+        boolean error = false;
+
+        if (issueRepository.countByUser_Id(userId) < 2) {
+            if (issueRepository.findIssuesByBook_IdAndUser_Id(bookId, userId).isEmpty()) {
+                newIssue = new Issue();
+                newIssue.setBook(bookRepository.getById(bookId));
+                newIssue.setUser(userRepository.getById(userId));
+                newIssue = issueRepository.save(newIssue);
+                message = "Book issued successfully";
+            } else {
+                error = true;
+                message = "You have already been issued one copy of this book";
+            }
+        } else {
+            error = true;
+            message = "You have borrowed maximum number of books allowed";
         }
-        return Optional.ofNullable(i);
+        resultMap.put("message", message);
+        resultMap.put("issue", newIssue);
+        resultMap.put("hasError", error);
+        return resultMap;
     }
 
     /**
