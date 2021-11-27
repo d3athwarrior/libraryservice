@@ -55,6 +55,8 @@ Design documents available in the 'documents' folder.
    1. ser can view list of books in the library
 2. User can borrow a book from the library
 3. User can borrow a copy of a book from the library
+4. User can return books to the library
+5. User can login
 
 #### Future Scope
 
@@ -63,5 +65,6 @@ Design documents available in the 'documents' folder.
    2. User can view the detail of a book in the library
 2. ~~User can borrow a book from the library~~
 3. ~~User can borrow a copy of a book from the library~~
-4. User can return books to the library
-5. User Login
+4. ~~User can return books to the library~~
+5. ~~User can Login~~
+6. User can view the list of books issued to them

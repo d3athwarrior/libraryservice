@@ -232,6 +232,30 @@ class LibraryserviceApplicationTests {
     }
     // END: USer story 4
 
+    // START: User Login Integration Test
+    @Test
+    void givenUsersInApplication_whenLoginForValidUser_thenUserIdShouldBeReturned() {
+        User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
+        ResponseEntity<Long> userBookDTOResponseEntity = testRestTemplate.postForEntity("/login",
+                u1.getId(),
+                Long.class);
+        Long responseId = userBookDTOResponseEntity.getBody();
+        assertNotNull(responseId);
+        assertEquals(u1.getId(), responseId);
+    }
+
+    @Test
+    void givenUsersInApplication_whenLoginForInvalidUser_thenUserIdShouldBeNegative() {
+        User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
+        ResponseEntity<Long> userBookDTOResponseEntity = testRestTemplate.postForEntity("/login",
+                10000L,
+                Long.class);
+        Long responseId = userBookDTOResponseEntity.getBody();
+        assertNotNull(responseId);
+        assertEquals(-1L, responseId);
+    }
+    // END: User login integration test
+
     @AfterEach
     public void tearDown() {
         issueRepository.deleteAll();

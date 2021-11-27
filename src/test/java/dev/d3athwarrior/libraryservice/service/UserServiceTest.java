@@ -2,7 +2,9 @@ package dev.d3athwarrior.libraryservice.service;
 
 import dev.d3athwarrior.libraryservice.entity.Book;
 import dev.d3athwarrior.libraryservice.entity.Issue;
+import dev.d3athwarrior.libraryservice.entity.User;
 import dev.d3athwarrior.libraryservice.repository.IssueRepository;
+import dev.d3athwarrior.libraryservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -23,11 +26,14 @@ public class UserServiceTest {
     @Mock
     private IssueRepository issueRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     private UserService userService;
 
     @BeforeEach
     public void setUp() {
-        userService = new UserService(issueRepository);
+        userService = new UserService(issueRepository, userRepository);
     }
 
     @Test
@@ -66,5 +72,21 @@ public class UserServiceTest {
         assertThat(result.get("returnedBookId")).isNull();
         assertThat(result.get("message")).isEqualTo("You were not issued this book");
         assertThat((Boolean) result.get("hasError")).isEqualTo(true);
+    }
+
+    @Test
+    void givenUsersInDB_whenValidUserIdPassed_thenTheUserIdIsReturned() {
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(new User(10L, "Test", "Test")));
+        Long userId = userService.validateUser(10L);
+        assertThat(userId).isNotNull();
+        assertThat(userId).isEqualTo(10L);
+    }
+
+    @Test
+    void givenUsersInDB_whenInvalidUserIdPassed_thenNegativeNumberReturned() {
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+        Long userId = userService.validateUser(45L);
+        assertThat(userId).isNotNull();
+        assertThat(userId).isEqualTo(-1L);
     }
 }
