@@ -50,6 +50,10 @@ public class BookService {
      * @return Optional of {@link Issue}. In case the object has been saved successfully, it will contain the Issue object
      * else it will be empty
      */
+    /*
+     * A point of improvement is to use a Bean as a return type than a Map which will make things clear on the calling
+     * method as to what are the items being returned from this method
+     */
     public Map<String, Object> issueBook(long bookId, long userId) {
         Issue newIssue = null;
         Map<String, Object> resultMap = new HashMap<>();

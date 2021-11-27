@@ -2,6 +2,7 @@ package dev.d3athwarrior.libraryservice;
 
 import dev.d3athwarrior.libraryservice.dto.BookDTO;
 import dev.d3athwarrior.libraryservice.dto.BookIssueDTO;
+import dev.d3athwarrior.libraryservice.dto.UserBookDTO;
 import dev.d3athwarrior.libraryservice.entity.Book;
 import dev.d3athwarrior.libraryservice.entity.Issue;
 import dev.d3athwarrior.libraryservice.entity.User;
@@ -15,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -150,7 +153,9 @@ class LibraryserviceApplicationTests {
     void givenOnlyOneCopyOfBookInLibrary_whenUserBorrowsTheBook_thenNoCopyShouldBeLeftInLibrary() {
         Book b1 = bookRepository.save(new Book(null, "TestName", "TestAuthorName", 1));
         User u1 = userRepository.save(new User(null, "Test", "User"));
-        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b1.getId() + "/issueto/" + u1.getId(), null, BookIssueDTO.class);
+        ResponseEntity<BookIssueDTO> bookIssueDTOResponseEntity = testRestTemplate.postForEntity("/books/" + b1.getId() + "/issueto/" + u1.getId(),
+                null,
+                BookIssueDTO.class);
         BookIssueDTO dto = bookIssueDTOResponseEntity.getBody();
         assertNotNull(dto);
         assertFalse(dto.getHasError());
@@ -159,6 +164,73 @@ class LibraryserviceApplicationTests {
         assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
     }
     // END: User story 3
+
+    // START: User story 4
+
+    /**
+     * User can return books to the library
+     * <p>
+     * Given, I have 2 books in my borrowed list
+     * When, I return one book to the library
+     * Then, the book is removed from my borrowed list
+     * And, the library reflects the updated stock of the book
+     */
+    @Test
+    void givenUserHasBorrowedTwoBooks_whenUserReturnsOneBook_thenTheBookShouldBeRemovedFromUserIssuedBooks_andLibraryWillReflectTheUpdatedNumberOfCopiesAvailable() {
+        Book b1 = bookRepository.saveAndFlush(new Book(null, "TestName", "TestAuthorName", 1));
+        Book b2 = bookRepository.saveAndFlush(new Book(null, "TestName2", "TestAuthorName2", 1));
+        User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
+        issueRepository.saveAndFlush(new Issue(null, u1, b1));
+        issueRepository.saveAndFlush(new Issue(null, u1, b2));
+        ResponseEntity<UserBookDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
+                null,
+                UserBookDTO.class);
+        UserBookDTO dto = userBookDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertEquals(u1.getId(), dto.getUserId());
+        assertEquals(b1.getId(), dto.getReturnedBookId());
+        assertEquals(1, dto.getUserBookList().size());
+        assertEquals(b2.getName(), dto.getUserBookList().get(0).getBook().getName());
+        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        assertNotNull(responseEntity.getBody());
+        assertTrue(Arrays.stream(responseEntity.getBody())
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+
+    }
+
+    /**
+     * Given, I have 2 books in my borrowed list
+     * When, I return both books to the library
+     * Then, my borrowed list is empty
+     * And, the library reflects the updated stock of the books
+     */
+    @Test
+    void givenUserHasBorrowedTwoBooks_whenUserReturnsBothTheBooks_thenTheIssuedBooksToUserAreEmpty_andTheLibraryReflectsOriginalAvailableQuantities() {
+        Book b1 = bookRepository.saveAndFlush(new Book(null, "TestName", "TestAuthorName", 1));
+        Book b2 = bookRepository.saveAndFlush(new Book(null, "TestName2", "TestAuthorName2", 1));
+        User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
+        issueRepository.saveAndFlush(new Issue(null, u1, b1));
+        issueRepository.saveAndFlush(new Issue(null, u1, b2));
+        ResponseEntity<UserBookDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
+                null,
+                UserBookDTO.class);
+        UserBookDTO dto = userBookDTOResponseEntity.getBody();
+        assertNotNull(dto);
+        assertEquals(1, dto.getUserBookList().size());
+        ResponseEntity<UserBookDTO> userBookDTOResponseEntity1 = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b2.getId(),
+                null,
+                UserBookDTO.class);
+        UserBookDTO dto1 = userBookDTOResponseEntity1.getBody();
+        assertNotNull(dto1);
+        assertEquals(0, dto1.getUserBookList().size());
+        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        assertNotNull(responseEntity.getBody());
+        assertTrue(Arrays.stream(responseEntity.getBody())
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+        assertTrue(Arrays.stream(responseEntity.getBody())
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b2.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+    }
+    // END: USer story 4
 
     @AfterEach
     public void tearDown() {
