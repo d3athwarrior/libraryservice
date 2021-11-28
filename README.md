@@ -7,9 +7,13 @@ functions that would usually be performed manually in a library.
 
 The details about the features currently implemented and planned are available in the following sections.
 
-Design documents available in the 'documents' folder.
+Design documents available in the `documents` folder.
 
 Sample UI for this API is available in the project `libraryui` which is built using Angular 13 with MaterialUI
+
+Code coverage screenshot is available in `documents` folder
+
+Integration tests are written in `dev.d3athwarrior.libraryservice.LibraryserviceApplicationTests`
 
 All my thoughts and assumptions are added in the comments in each file. Certain project level assumptions are available
 at the end of this README
@@ -87,15 +91,19 @@ at the end of this README
 5. ~~User can Login~~
 6. ~~User can view the list of books issued to them~~
 7. Implement OAuth based authentication and implement filters so that all the endpoints are secured correctly
+8. Application wide exception handling and other basic exception handling
 
 ### Assumptions and Known Issues
 
 1. The application will be deployed locally for the purpose of evaluation
-2. There will be no administrator to add books and user, and they have to be added via database queries
-3. The libraryservice application can be used by multiple applications across different devices, hence it is created as
+2. DDL scripts need to be run manually prior to running the application
+3. There will be no administrator to add books and user, and they have to be added via database queries
+4. The libraryservice application can be used by multiple applications across different devices, hence it is created as
    a service rather than a MVC application with UI included
-4. All the end points are not secured as of now, but can be implemented later
-5. All the places where Map<K,V> is used in service as method return type, ideally, should be converted to Bean to give
+5. All the end points are not secured as of now, but can be implemented later
+6. All the places where Map<K,V> is used in service as method return type, ideally, should be converted to Bean to give
    a clear picture to the consuming class about what will be returned.
-6. Code coverage could be improved for certain Entity, DTO classes by removing some setters, getters or toString
+7. Code coverage could be improved for certain Entity, DTO classes by removing some setters, getters or toString
    methods, but I have let them be there.
+8. Currently, no exception handling exists for any kind of exception apart from the one provided by spring out of the
+   box

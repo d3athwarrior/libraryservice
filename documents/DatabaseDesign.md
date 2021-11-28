@@ -8,6 +8,9 @@ the best but for the sake of convenience, this liberty has been taken to ignore 
 
 The tables below are mapped to JPA objects of same name in the project
 
+The DDL scripts need to be manually run in case the default DB configuration bundled with the application is not being
+used.
+
 ## Tables
 
 1. **book**  
