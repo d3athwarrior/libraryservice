@@ -89,4 +89,22 @@ public class UserServiceTest {
         assertThat(userId).isNotNull();
         assertThat(userId).isEqualTo(-1L);
     }
+
+    @Test
+    void givenUserHasBorrowedBooks_whenValidUserIsPassed_thenReturnTheListOfBorrowedBooks() {
+        List<Issue> issueList = new ArrayList<>();
+        issueList.add(new Issue());
+        given(issueRepository.findIssuesByUser_Id(anyLong())).willReturn(issueList);
+        List<Issue> userIssueList = userService.getUserBooks(25L);
+        assertThat(userIssueList).isNotNull();
+        assertThat(userIssueList).hasSize(1);
+    }
+
+    @Test
+    void givenUseHasNoBorrowedBooks_whenValidUserIsPassed_thenReturnEmpty() {
+        given(issueRepository.findIssuesByUser_Id(anyLong())).willReturn(new ArrayList<>());
+        List<Issue> userIssueList = userService.getUserBooks(25L);
+        assertThat(userIssueList).isNotNull();
+        assertThat(userIssueList).hasSize(0);
+    }
 }

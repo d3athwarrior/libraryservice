@@ -2,7 +2,8 @@ package dev.d3athwarrior.libraryservice;
 
 import dev.d3athwarrior.libraryservice.dto.BookDTO;
 import dev.d3athwarrior.libraryservice.dto.BookIssueDTO;
-import dev.d3athwarrior.libraryservice.dto.UserBookDTO;
+import dev.d3athwarrior.libraryservice.dto.UserBookResponseDTO;
+import dev.d3athwarrior.libraryservice.dto.UserReturnBookResponseDTO;
 import dev.d3athwarrior.libraryservice.entity.Book;
 import dev.d3athwarrior.libraryservice.entity.Issue;
 import dev.d3athwarrior.libraryservice.entity.User;
@@ -96,6 +97,13 @@ class LibraryserviceApplicationTests {
         assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
         assertFalse(dto.getHasError());
         assertEquals("Book issued successfully", dto.getMessage());
+        ResponseEntity<UserBookResponseDTO> userBookResponseDTOResponseEntity = testRestTemplate.getForEntity("/users/" + u1.getId() + "/issuedBooks/",
+                UserBookResponseDTO.class);
+        assertEquals(200, userBookResponseDTOResponseEntity.getStatusCodeValue());
+        UserBookResponseDTO dto1 = userBookResponseDTOResponseEntity.getBody();
+        assertNotNull(dto1);
+        assertEquals(u1.getId(), dto1.getUserId());
+        assertEquals(b2.getId(), dto1.getIssuedBooks().get(0).getId());
 
     }
 
@@ -141,6 +149,13 @@ class LibraryserviceApplicationTests {
         assertEquals("Book issued successfully", dto.getMessage());
         assertEquals(b1.getId(), dto.getBookDTO().getId());
         assertEquals(1, dto.getBookDTO().getNumCopiesAvailable());
+        ResponseEntity<UserBookResponseDTO> userBookResponseDTOResponseEntity = testRestTemplate.getForEntity("/users/" + u1.getId() + "/issuedBooks/",
+                UserBookResponseDTO.class);
+        assertEquals(200, userBookResponseDTOResponseEntity.getStatusCodeValue());
+        UserBookResponseDTO dto1 = userBookResponseDTOResponseEntity.getBody();
+        assertNotNull(dto1);
+        assertEquals(u1.getId(), dto1.getUserId());
+        assertEquals(b1.getId(), dto1.getIssuedBooks().get(0).getId());
     }
 
     /**
@@ -162,6 +177,13 @@ class LibraryserviceApplicationTests {
         assertEquals("Book issued successfully", dto.getMessage());
         assertEquals(b1.getId(), dto.getBookDTO().getId());
         assertEquals(0, dto.getBookDTO().getNumCopiesAvailable());
+        ResponseEntity<UserBookResponseDTO> userBookResponseDTOResponseEntity = testRestTemplate.getForEntity("/users/" + u1.getId() + "/issuedBooks/",
+                UserBookResponseDTO.class);
+        assertEquals(200, userBookResponseDTOResponseEntity.getStatusCodeValue());
+        UserBookResponseDTO dto1 = userBookResponseDTOResponseEntity.getBody();
+        assertNotNull(dto1);
+        assertEquals(u1.getId(), dto1.getUserId());
+        assertEquals(b1.getId(), dto1.getIssuedBooks().get(0).getId());
     }
     // END: User story 3
 
@@ -182,19 +204,26 @@ class LibraryserviceApplicationTests {
         User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
         issueRepository.saveAndFlush(new Issue(null, u1, b1));
         issueRepository.saveAndFlush(new Issue(null, u1, b2));
-        ResponseEntity<UserBookDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
+        ResponseEntity<UserReturnBookResponseDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
                 null,
-                UserBookDTO.class);
-        UserBookDTO dto = userBookDTOResponseEntity.getBody();
+                UserReturnBookResponseDTO.class);
+        UserReturnBookResponseDTO dto = userBookDTOResponseEntity.getBody();
         assertNotNull(dto);
         assertEquals(u1.getId(), dto.getUserId());
         assertEquals(b1.getId(), dto.getReturnedBookId());
-        assertEquals(1, dto.getUserBookList().size());
-        assertEquals(b2.getName(), dto.getUserBookList().get(0).getBook().getName());
+        assertEquals(1, dto.getIssuedBooks().size());
+        assertEquals(b2.getName(), dto.getIssuedBooks().get(0).getName());
         ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
         assertNotNull(responseEntity.getBody());
         assertTrue(Arrays.stream(responseEntity.getBody())
-                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable().equals(b1.getNumOfCopies())));
+        ResponseEntity<UserBookResponseDTO> userBookResponseDTOResponseEntity = testRestTemplate.getForEntity("/users/" + u1.getId() + "/issuedBooks/",
+                UserBookResponseDTO.class);
+        assertEquals(200, userBookResponseDTOResponseEntity.getStatusCodeValue());
+        UserBookResponseDTO dto1 = userBookResponseDTOResponseEntity.getBody();
+        assertNotNull(dto1);
+        assertEquals(u1.getId(), dto1.getUserId());
+        assertEquals(b2.getId(), dto1.getIssuedBooks().get(0).getId());
 
     }
 
@@ -211,24 +240,31 @@ class LibraryserviceApplicationTests {
         User u1 = userRepository.saveAndFlush(new User(null, "Test", "User"));
         issueRepository.saveAndFlush(new Issue(null, u1, b1));
         issueRepository.saveAndFlush(new Issue(null, u1, b2));
-        ResponseEntity<UserBookDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
+        ResponseEntity<UserReturnBookResponseDTO> userBookDTOResponseEntity = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b1.getId(),
                 null,
-                UserBookDTO.class);
-        UserBookDTO dto = userBookDTOResponseEntity.getBody();
+                UserReturnBookResponseDTO.class);
+        UserReturnBookResponseDTO dto = userBookDTOResponseEntity.getBody();
         assertNotNull(dto);
-        assertEquals(1, dto.getUserBookList().size());
-        ResponseEntity<UserBookDTO> userBookDTOResponseEntity1 = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b2.getId(),
+        assertEquals(1, dto.getIssuedBooks().size());
+        ResponseEntity<UserReturnBookResponseDTO> userBookDTOResponseEntity1 = testRestTemplate.postForEntity("/users/" + u1.getId() + "/returnbook/" + b2.getId(),
                 null,
-                UserBookDTO.class);
-        UserBookDTO dto1 = userBookDTOResponseEntity1.getBody();
+                UserReturnBookResponseDTO.class);
+        UserReturnBookResponseDTO dto1 = userBookDTOResponseEntity1.getBody();
         assertNotNull(dto1);
-        assertEquals(0, dto1.getUserBookList().size());
+        assertEquals(0, dto1.getIssuedBooks().size());
         ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
         assertNotNull(responseEntity.getBody());
         assertTrue(Arrays.stream(responseEntity.getBody())
-                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable().equals(b1.getNumOfCopies())));
         assertTrue(Arrays.stream(responseEntity.getBody())
-                .anyMatch(bookDTO -> bookDTO.getName().equals(b2.getName()) && bookDTO.getNumCopiesAvailable() == b1.getNumOfCopies()));
+                .anyMatch(bookDTO -> bookDTO.getName().equals(b2.getName()) && bookDTO.getNumCopiesAvailable().equals(b1.getNumOfCopies())));
+        ResponseEntity<UserBookResponseDTO> userBookResponseDTOResponseEntity = testRestTemplate.getForEntity("/users/" + u1.getId() + "/issuedBooks/",
+                UserBookResponseDTO.class);
+        assertEquals(200, userBookResponseDTOResponseEntity.getStatusCodeValue());
+        UserBookResponseDTO dto2 = userBookResponseDTOResponseEntity.getBody();
+        assertNotNull(dto2);
+        assertEquals(u1.getId(), dto1.getUserId());
+        assertEquals(0, dto1.getIssuedBooks().size());
     }
     // END: USer story 4
 

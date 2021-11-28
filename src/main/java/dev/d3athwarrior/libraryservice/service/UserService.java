@@ -61,4 +61,8 @@ public class UserService {
     public Long validateUser(Long userId) {
         return this.userRepository.findById(userId).orElse(new User(-1L, null, null)).getId();
     }
+
+    public List<Issue> getUserBooks(Long userId) {
+        return issueRepository.findIssuesByUser_Id(userId);
+    }
 }
