@@ -5,11 +5,11 @@ package dev.d3athwarrior.libraryservice.dto;
  */
 public class BookDTO {
 
-    private long id;
+    private Long id;
     private String name;
     private String authorName;
-    private int numOfCopies;
-    private int numCopiesAvailable;
+    private Integer numOfCopies;
+    private Integer numCopiesAvailable;
 
     public BookDTO() {
     }
@@ -20,7 +20,7 @@ public class BookDTO {
      * @param authorName  The name of the author of the book
      * @param numOfCopies The number of copies owned
      */
-    public BookDTO(long id, String name, String authorName, int numOfCopies, int numCopiesAvailable) {
+    public BookDTO(Long id, String name, String authorName, Integer numOfCopies, Integer numCopiesAvailable) {
         this.id = id;
         this.name = name;
         this.authorName = authorName;
@@ -28,7 +28,7 @@ public class BookDTO {
         this.numCopiesAvailable = numCopiesAvailable;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -40,11 +40,11 @@ public class BookDTO {
         return authorName;
     }
 
-    public int getNumOfCopies() {
+    public Integer getNumOfCopies() {
         return numOfCopies;
     }
 
-    public int getNumCopiesAvailable() {
+    public Integer getNumCopiesAvailable() {
         return numCopiesAvailable;
     }
 }
