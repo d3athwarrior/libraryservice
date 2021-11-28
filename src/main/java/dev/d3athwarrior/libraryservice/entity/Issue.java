@@ -5,6 +5,11 @@ import javax.persistence.*;
 /**
  * Issue class represents the mapping of a user to a book in the database
  */
+/*
+ * Possibly, this table could have been avoided and one to many relationships could have been provided in the Book.java entity
+ * and User.java entity for now but in the future if we wanted more details along with the person who borrowed a book,
+ * we would have to refactor the DB to accommodate items like issue date, return date etc
+ */
 @Table(name = "issue", indexes = {
         @Index(name = "user_borrowed_book_pk", columnList = "user_id, book_id", unique = true)
 })

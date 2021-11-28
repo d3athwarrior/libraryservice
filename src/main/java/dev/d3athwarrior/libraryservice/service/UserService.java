@@ -62,6 +62,10 @@ public class UserService {
         return this.userRepository.findById(userId).orElse(new User(-1L, null, null)).getId();
     }
 
+    /**
+     * @param userId the id of the user of whom issued books are to be fetched
+     * @return the list of books issued to the user, empty if no books are issued
+     */
     public List<Issue> getUserBooks(Long userId) {
         return issueRepository.findIssuesByUser_Id(userId);
     }

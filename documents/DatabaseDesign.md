@@ -1,9 +1,15 @@
 ## Thought process
+
 The initial requirement only talks about users and books so the focus is on having books and users only.
 
-There is a chance that in future the requirement may arise of having books viewed by authors in which case the book table will have to be split and another author table will have to be added. Considering this, the current design isn't the best but for the sake of convenience, this liberty has been taken to ignore the future requirement.
+There is a chance that in future the requirement may arise of having books viewed by authors in which case the book
+table will have to be split and another author table will have to be added. Considering this, the current design isn't
+the best but for the sake of convenience, this liberty has been taken to ignore the future requirement.
+
+The tables below are mapped to JPA objects of same name in the project
 
 ## Tables
+
 1. **book**  
    Contains the detail of all available books
 2. **app_user**

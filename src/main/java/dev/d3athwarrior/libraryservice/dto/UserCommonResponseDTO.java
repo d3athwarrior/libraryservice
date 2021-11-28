@@ -2,6 +2,9 @@ package dev.d3athwarrior.libraryservice.dto;
 
 import java.util.List;
 
+/**
+ * This class hold all the common DTO attributes which are shared among user action based response DTO
+ */
 public abstract class UserCommonResponseDTO {
     private Long userId;
     private String message;

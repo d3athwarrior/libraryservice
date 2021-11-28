@@ -1,13 +1,23 @@
 # libraryservice
 
 ### About
-libraryservice is a backend for a library management software which will exposed RESTful end points to perform various functions that would usually be performed manually in a library.
+
+libraryservice is a backend for a library management software which will exposed RESTful end points to perform various
+functions that would usually be performed manually in a library.
 
 The details about the features currently implemented and planned are available in the following sections.
 
 Design documents available in the 'documents' folder.
 
+Sample UI for this API is available in the project `libraryui` which is built using Angular 13 with MaterialUI
+
+All my thoughts and assumptions are added in the comments in each file. Certain project level assumptions are available
+at the end of this README
+
+**NOTE:** Some data is already available in the database mentioned in the application.yml file
+
 #### Tech Stack
+
 1. Java 11
 2. Spring Boot 2.6.0
 3. Spring Web
@@ -15,6 +25,9 @@ Design documents available in the 'documents' folder.
 5. Postgres via [ElephantSQL](https://www.elephantsql.com/) (Service Limitation: Data size 20MB, Max Connection: 1)
 6. Linux (Arch Linux)
 7. IDE - IntelliJ
+8. Spring Boot Test
+9. Mockito
+10. JUnit5 (Jupiter)
 
 
 ### How to build the project
@@ -42,6 +55,10 @@ Design documents available in the 'documents' folder.
 2. Make sure you have read and performed the steps of 'How to build the project'
 3. Open a command window where the jar file is and enter ```java -jar libraryservice-\<version_number\>.jar```
 
+###### Alternatively
+
+1. Navigate to the project directory and enter `./gradelw bootRun` on linux or `./gradlew.bat bootRun`
+
 ### How to run the tests
 
 1. Navigate to the project root directory
@@ -57,6 +74,7 @@ Design documents available in the 'documents' folder.
 3. User can borrow a copy of a book from the library
 4. User can return books to the library
 5. User can login
+6. User can view the list of books issued to them
 
 #### Future Scope
 
@@ -67,4 +85,17 @@ Design documents available in the 'documents' folder.
 3. ~~User can borrow a copy of a book from the library~~
 4. ~~User can return books to the library~~
 5. ~~User can Login~~
-6. User can view the list of books issued to them
+6. ~~User can view the list of books issued to them~~
+7. Implement OAuth based authentication and implement filters so that all the endpoints are secured correctly
+
+### Assumptions and Known Issues
+
+1. The application will be deployed locally for the purpose of evaluation
+2. There will be no administrator to add books and user, and they have to be added via database queries
+3. The libraryservice application can be used by multiple applications across different devices, hence it is created as
+   a service rather than a MVC application with UI included
+4. All the end points are not secured as of now, but can be implemented later
+5. All the places where Map<K,V> is used in service as method return type, ideally, should be converted to Bean to give
+   a clear picture to the consuming class about what will be returned.
+6. Code coverage could be improved for certain Entity, DTO classes by removing some setters, getters or toString
+   methods, but I have let them be there.

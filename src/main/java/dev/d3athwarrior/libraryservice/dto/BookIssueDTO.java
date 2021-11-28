@@ -1,5 +1,9 @@
 package dev.d3athwarrior.libraryservice.dto;
 
+/**
+ * The {@link BookIssueDTO} represents the data which will be sent to the client once a book issue
+ * operation has been completed. This DTO will hold the message in case of success or failure.
+ */
 public class BookIssueDTO {
     private Long userId;
     private String message;
