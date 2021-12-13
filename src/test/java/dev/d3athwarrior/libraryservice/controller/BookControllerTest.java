@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -21,8 +22,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
 public class BookControllerTest {
@@ -44,7 +44,7 @@ public class BookControllerTest {
         bookList.add(b);
         given(bookService.getAllBooks()).willReturn(bookList);
         given(bookService.getRemainingBookCount(anyLong())).willReturn(1, 0);
-        mockMvc.perform(MockMvcRequestBuilders.get("/books/all"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/books"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id", containsInAnyOrder(1, 2)))
@@ -61,7 +61,7 @@ public class BookControllerTest {
     void givenNoBooksInLibrary_whenGetRequestToBooksAll_thenNoBooksAreReturned() throws Exception {
         given(bookService.getAllBooks()).willReturn(new ArrayList<>());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/books/all"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/books"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)))
                 .andExpect(jsonPath("$[*]", empty()))
@@ -151,6 +151,30 @@ public class BookControllerTest {
                 .andExpect(jsonPath("$.hasError", is(true)))
                 .andExpect(jsonPath("$.message", is("You have already been issued one copy of this book")))
                 .andReturn();
+    }
+
+//    POST: books -> service -> id
+
+//    response: 201, header location: books/id
+
+    @Test
+    void givenUserIsAnAdmin_whenThisUserAddsABookToTheLibrary_thenTheNewlyAddedBookShouldBeVisible() throws Exception {
+        given(bookService.addBook(new Book("New Book", "Random", 5))).willReturn(1);
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .post("/books")
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .content("{" +
+                                        "\"authorName\":\"Random\", " +
+                                        "\"numOfCopies\":5, " +
+                                        "\"name\":\"New Book\"" +
+                                        "}"))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("location"))
+                .andExpect(header().string("location", "/books/1"))
+                .andReturn();
+//                .andExpect();
+        verify(bookService, times(1)).addBook(new Book());
     }
 }
 

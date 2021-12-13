@@ -48,7 +48,7 @@ class LibraryserviceApplicationTests {
      */
     @Test
     void givenNoBooksInLibrary_whenBooksViewed_thenEmptyLibrary() {
-        ResponseEntity<BookDTO[]> listResponseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        ResponseEntity<BookDTO[]> listResponseEntity = testRestTemplate.getForEntity("/books", BookDTO[].class);
         assertNotNull(listResponseEntity.getBody());
         assertEquals(0, listResponseEntity.getBody().length);
     }
@@ -64,7 +64,7 @@ class LibraryserviceApplicationTests {
         bookRepository.save(new Book(null, "TestName", "TestAuthorName", 2));
         bookRepository.save(new Book(null, "TestName2", "TestAuthorName2", 2));
         bookRepository.save(new Book(null, "TestName3", "TestAuthorName3", 2));
-        ResponseEntity<BookDTO[]> listResponseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        ResponseEntity<BookDTO[]> listResponseEntity = testRestTemplate.getForEntity("/books", BookDTO[].class);
         assertNotNull(listResponseEntity.getBody());
         assertEquals(3, listResponseEntity.getBody().length);
     }
@@ -213,7 +213,7 @@ class LibraryserviceApplicationTests {
         assertEquals(b1.getId(), dto.getReturnedBookId());
         assertEquals(1, dto.getIssuedBooks().size());
         assertEquals(b2.getName(), dto.getIssuedBooks().get(0).getName());
-        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books", BookDTO[].class);
         assertNotNull(responseEntity.getBody());
         assertTrue(Arrays.stream(responseEntity.getBody())
                 .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable().equals(b1.getNumOfCopies())));
@@ -252,7 +252,7 @@ class LibraryserviceApplicationTests {
         UserReturnBookResponseDTO dto1 = userBookDTOResponseEntity1.getBody();
         assertNotNull(dto1);
         assertEquals(0, dto1.getIssuedBooks().size());
-        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books/all", BookDTO[].class);
+        ResponseEntity<BookDTO[]> responseEntity = testRestTemplate.getForEntity("/books", BookDTO[].class);
         assertNotNull(responseEntity.getBody());
         assertTrue(Arrays.stream(responseEntity.getBody())
                 .anyMatch(bookDTO -> bookDTO.getName().equals(b1.getName()) && bookDTO.getNumCopiesAvailable().equals(b1.getNumOfCopies())));

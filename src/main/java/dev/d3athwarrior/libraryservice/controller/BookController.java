@@ -2,12 +2,15 @@ package dev.d3athwarrior.libraryservice.controller;
 
 import dev.d3athwarrior.libraryservice.dto.BookDTO;
 import dev.d3athwarrior.libraryservice.dto.BookIssueDTO;
+import dev.d3athwarrior.libraryservice.dto.BookToAddDTO;
 import dev.d3athwarrior.libraryservice.entity.Book;
 import dev.d3athwarrior.libraryservice.entity.Issue;
 import dev.d3athwarrior.libraryservice.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +33,7 @@ public class BookController {
     /**
      * @return the list of all books in the library
      */
-    @GetMapping("all")
+    @GetMapping("")
     public List<BookDTO> getAllBooks() {
         List<Book> bookList = bookService.getAllBooks();
         return bookList.stream().map(book -> new BookDTO(book.getId(), book.getName(), book.getAuthorName(), book.getNumOfCopies(), bookService.getRemainingBookCount(book.getId()))).collect(Collectors.toList());
@@ -59,5 +62,14 @@ public class BookController {
             bookIssueDTO.setBookDTO(new BookDTO(issuedBook.getId(), issuedBook.getName(), issuedBook.getAuthorName(), issuedBook.getNumOfCopies(), bookService.getRemainingBookCount(issuedBook.getId())));
         }
         return bookIssueDTO;
+    }
+
+    @PostMapping("")
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public void addBook(@RequestBody BookToAddDTO bookToAddDTO, HttpServletResponse response) {
+        Integer id = bookService.addBook(new Book(bookToAddDTO.getName(), bookToAddDTO.getAuthorName(), bookToAddDTO.getNumOfCopies()));
+        response.setHeader("location",
+                "/books/" + id);
+        System.out.println(bookToAddDTO);
     }
 }

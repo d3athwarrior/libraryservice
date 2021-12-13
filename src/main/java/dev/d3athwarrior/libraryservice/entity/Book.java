@@ -33,6 +33,12 @@ public class Book {
         this.numOfCopies = numOfCopies;
     }
 
+    public Book(String name, String authorName, Integer numOfCopies) {
+        this.name = name;
+        this.authorName = authorName;
+        this.numOfCopies = numOfCopies;
+    }
+
     public Long getId() {
         return id;
     }

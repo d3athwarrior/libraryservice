@@ -91,4 +91,12 @@ public class BookService {
         Optional<Book> optionalBook = bookRepository.findById(bookId);
         return optionalBook.map(book -> book.getNumOfCopies() - issueRepository.countByBook_Id(bookId).orElse(0)).orElse(0);
     }
+
+    /**
+     * @param bookToAdd the book to add to the database
+     * @return the id of the book added
+     */
+    public Integer addBook(Book bookToAdd) {
+        return null;
+    }
 }
